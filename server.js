@@ -17,24 +17,43 @@ const io = new Server(server, {
    }
 });
 
-const allFirebaseUsers =[];
+server.listen(3001, ()=> {console.log('Server is Live')});
+
+let allFirebaseUsers =[];
 
 io.on("connection", (socket) => {
 
+   // Listening to a Auth User Data upon Socket Connection
+   // Joining a Room 
+   // Broadcasting all Auth Users' Data back to the same room
    console.log(`A client has connected... ${socket.id}`);
-   // socket.on("join_room", (room) => {
-   //    socket.join(room);
-   //    console.log(`user ${socket.id} has joined ${room}`);
-   // });
-
-      socket.on("firebaseUser", (data) => {
-         socket.join(data.room);
-         console.log(data);
-         allFirebaseUsers.push(data)
-         io.to(data.room).emit("allUsers", allFirebaseUsers);
+   socket.on("firebaseUser", (data) => {
+      socket.join(data.room);
+      console.log(data);
+      allFirebaseUsers.push(data)
+      io.to(data.room).emit("allUsers", allFirebaseUsers);
    });
-});
+
+   // Diconnecting from the Room
+   socket.on("disconnecting", () => {
+      // console.log(`user ${socket.id} disconnected`);
+      let room = Array.from(socket.rooms)[1];
+      // console.log(`user ${socket.id} left ${room}`);
+      socket.leave(room);
+      allFirebaseUsers = allFirebaseUsers.filter((user) => user.socketId !== socket.id);
+      io.to(room).emit("allUsers", allFirebaseUsers);
+   });
+})
 
 
-
-server.listen(3001, ()=> {console.log('Server is live')});
+// io.on('connection', (socket) => {
+//    console.log('Client connected');
+ 
+//    socket.on('firebaseUser', (data) => {
+//      console.log(data);
+//    });
+ 
+//    socket.on('disconnecting', () => {
+//      console.log('Client disconnected');
+//    });
+//  });

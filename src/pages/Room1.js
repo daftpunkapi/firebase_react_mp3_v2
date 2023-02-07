@@ -14,7 +14,7 @@ const Room1 = () => {
 
   const joinRoomSocket = () =>{
     // socket.emit("join_room", "room1");
-    socket.emit("firebaseUser",{userId : user.uid, socketId: socket.id, name: user.displayName, room:"room1"}, );
+    socket.emit("firebaseUser",{userId : user.uid, socketId: socket.id, name: user.displayName, avatar: user.photoURL, email: user.email, room:"room1"});
   }
 
   useEffect(() => {
@@ -38,9 +38,20 @@ const Room1 = () => {
       {allUsers.map(data => {
         // if(data.socketId !== socket.id){
           return(
-            <div> {data.name}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', margin: '10px 0' }}> 
+               <p style={{ margin: '0 10px' }}>{data.email}</p>
+               <img 
+                src={data.avatar} 
+                alt="User Avatar" 
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '25px',
+                  objectFit: 'cover'
+                }}
+                />
+            </div>
           );
-        // }
       })}
 
     </div>
@@ -49,6 +60,29 @@ const Room1 = () => {
 
 export default Room1;
 
+// import '../App.css';
+// import React, { useContext, useEffect } from 'react';
+// import { SocketContext } from "../context/RoomContext";
+// import { UserAuth } from "../context/AuthContext";
 
+
+// const Room1 = () => {
+//   const {user} = UserAuth();
+//   const socket = useContext(SocketContext);
+
+//   useEffect(() => {
+//     socket.emit("firebaseUser",{userId : user.uid, socketId: socket.id, name: user.displayName, avatar: user.photoURL, email: user.email, room:"room1"});
+//   }, [socket]);
+
+//   return (
+//     <div className='App'>
+//       <h1>
+//         Room1
+//       </h1>
+//     </div>
+//   );
+// };
+
+// export default Room1;
 
 

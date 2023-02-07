@@ -16,17 +16,17 @@ const Account = () => {
         }
     }
     
-    const room1entry = async () => {
+    const room1entry = () => {
         try{
-            await navigate('/accountpage/room1');
+            navigate('/accountpage/room1');
         } catch (error) {
             console.log(error);
         }
     }
 
-    const room2entry = async () => {
+    const room2entry = () => {
       try{
-          await navigate('/accountpage/room2');
+        navigate('/accountpage/room2');
       } catch (error) {
           console.log(error);
       }
