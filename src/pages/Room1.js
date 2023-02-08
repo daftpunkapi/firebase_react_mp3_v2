@@ -1,41 +1,56 @@
-import React, { useEffect, useState } from 'react';
 import '../App.css';
+import React, { useContext, useEffect, useState } from 'react';
+import { SocketContext } from "../context/RoomContext";
 import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import io from 'socket.io-client';
 
-const socket = io.connect("http://localhost:3001");
-
+const cursorUrlArray = [
+  'https://icons.iconarchive.com/icons/svengraph/daft-punk/256/Daft-Punk-Guyman-Off-icon.png', 
+  'https://icons.iconarchive.com/icons/everaldo/starwars/128/Darth-Vader-icon.png', 
+  'https://icons.iconarchive.com/icons/everaldo/starwars/128/clone-old-icon.png',
+  'https://icons.iconarchive.com/icons/svengraph/daft-punk/256/Daft-Punk-Thomas-On-icon.png'
+];
 
 const Room1 = () => {
-  const {user} = UserAuth();
-  const [allUsers, setAllUsers] = useState([]);
-  const navigate = useNavigate();
+    const [allUsers, setAllUsers] = useState([]);
+    const socket = useContext(SocketContext);
+    const[otherCursors, setOtherUsers] = useState([]);
+    const [cursorUrl, setCursorUrl] = useState("");
+    const {user} = UserAuth();
+    const navigate = useNavigate();
 
-  const joinRoomSocket = () =>{
-    // socket.emit("join_room", "room1");
-    socket.emit("firebaseUser",{userId : user.uid, socketId: socket.id, name: user.displayName, avatar: user.photoURL, email: user.email, room:"room1"});
-  }
-
-  useEffect(() => {
-    if (!user) {
-    navigate("/");
-    };
-  
-    socket.on("allUsers", (data) => {
-      setAllUsers(data);
-    });
+    useEffect(() => {
+        
+        socket.on("allUsers", (data) => {
+            let roomdata = data
+            .filter(obj => obj.room === "room1")
+            setAllUsers(roomdata);
+        });
+        
+        function handleMouseMove(event){
+          socket.emit("mouseMove", {x: event.clientX, y: event.clientY});
+        }
     
-  }, [user, navigate]);
+        // Add event listener for mouse movement {part of DOM element}
+        document.addEventListener("mousemove", handleMouseMove);
+    
+        // Handle broadcasted mouseMoved event from server
+        socket.on("cursorUpdate", (data) => {
+          setOtherUsers(data);
+        });
 
-  return (
-    <div className='App'>
-      <h1>
-        Room 1
-      </h1>
-      <button onClick={joinRoomSocket}>Go Live!</button>
+        setCursorUrl(cursorUrlArray[Math.floor(Math.random() * cursorUrlArray.length)]);
 
-      {allUsers.map(data => {
+    }, [user, navigate]);
+
+    return (
+        <div className='App'>
+        
+        <h1>
+            Room1
+        </h1>
+        
+        {allUsers.map(data => {
         // if(data.socketId !== socket.id){
           return(
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', margin: '10px 0' }}> 
@@ -52,37 +67,29 @@ const Room1 = () => {
                 />
             </div>
           );
-      })}
+        })}
+        
+        {otherCursors.map((cursor, index) => {
+            if (cursor.socketId !== socket.id) {
+              return (
+                <div 
+                  key={cursor.socketId || index} 
+                  className="other-cursor" 
+                  style={{
+                    left: cursor.x,
+                    top: cursor.y,
+                    backgroundImage: `url(${cursorUrl})`
+                  }}
+                />
+              );
+            } else {
+              return null;
+            }
+        })}
 
-    </div>
-  );
-};
+        </div>
+    );
+ };
 
 export default Room1;
-
-// import '../App.css';
-// import React, { useContext, useEffect } from 'react';
-// import { SocketContext } from "../context/RoomContext";
-// import { UserAuth } from "../context/AuthContext";
-
-
-// const Room1 = () => {
-//   const {user} = UserAuth();
-//   const socket = useContext(SocketContext);
-
-//   useEffect(() => {
-//     socket.emit("firebaseUser",{userId : user.uid, socketId: socket.id, name: user.displayName, avatar: user.photoURL, email: user.email, room:"room1"});
-//   }, [socket]);
-
-//   return (
-//     <div className='App'>
-//       <h1>
-//         Room1
-//       </h1>
-//     </div>
-//   );
-// };
-
-// export default Room1;
-
 

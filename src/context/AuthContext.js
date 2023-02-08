@@ -17,14 +17,19 @@ export const AuthContextProvider = ({children}) => {
         signOut(auth);
     }
 
+    let hasLogged = false;
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        if (!hasLogged) {
             console.log('User', currentUser);
-        });
-        return () => {
-            unsubscribe();
-        };
+            hasLogged = true;
+        }
+    });
+    return () => {
+        unsubscribe();
+    };
     }, []);
 
 

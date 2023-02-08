@@ -15,14 +15,14 @@ function App() {
     <div className='App'>
         <AuthContextProvider>
           <Navbar />
-          {/* <SocketProvider> */}
+          <SocketProvider>
           <Routes>
             <Route path='/' element={<Signin />} />
             <Route path='/accountpage' element={<Protected><Account /></Protected>} />
             <Route path='/accountpage/room1' element={<Protected><Room1 /></Protected>} />
             <Route path='/accountpage/room2' element={<Protected><Room2 /></Protected>} />  
           </Routes>
-          {/* </SocketProvider> */}
+          </SocketProvider>
         </AuthContextProvider>
     </div>
   );
