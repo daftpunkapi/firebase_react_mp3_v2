@@ -1,8 +1,8 @@
 import '../App.css';
 import React, { useContext, useEffect, useState } from 'react';
 import { SocketContext } from "../context/RoomContext";
-import { UserAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+// import { UserAuth } from "../context/AuthContext";
+// import { useNavigate } from "react-router-dom";
 
 const cursorUrlArray = [
   'https://icons.iconarchive.com/icons/svengraph/daft-punk/256/Daft-Punk-Guyman-Off-icon.png', 
@@ -12,36 +12,48 @@ const cursorUrlArray = [
 ];
 
 const Room1 = () => {
-    const [allUsers, setAllUsers] = useState([]);
+    const [allRoomUsers, setRoomUsers] = useState([]);
     const socket = useContext(SocketContext);
-    const[otherCursors, setOtherUsers] = useState([]);
+    const[otherCursors, setOtherCursors] = useState([]);
     const [cursorUrl, setCursorUrl] = useState("");
-    const {user} = UserAuth();
-    const navigate = useNavigate();
+    // const {user} = UserAuth();
+    // const navigate = useNavigate();
 
     useEffect(() => {
         
-        socket.on("allUsers", (data) => {
+        socket.on("allRoomUsers", (data) => {
             let roomdata = data
-            .filter(obj => obj.room === "room1")
-            setAllUsers(roomdata);
+            .filter(obj => obj.room === "room1");
+            setRoomUsers(roomdata);
         });
         
         function handleMouseMove(event){
-          socket.emit("mouseMove", {x: event.clientX, y: event.clientY});
+          socket.emit("mouseMove", {socketId : socket.id, x: event.clientX, y: event.clientY});
         }
     
         // Add event listener for mouse movement {part of DOM element}
         document.addEventListener("mousemove", handleMouseMove);
-    
+        
+        // Event listener on hitting browser Back button
+        window.onpopstate = (e) => {
+          socket.emit("backrefresh");
+        };
+        
+        // Event listener on hitting browser Refresh button
+        // window.onbeforeunload = (e) => {
+        //   socket.emit("backrefresh");
+        // };
+
         // Handle broadcasted mouseMoved event from server
         socket.on("cursorUpdate", (data) => {
-          setOtherUsers(data);
+          let roomCursors = data
+          .filter (obj => obj.room === "room1");
+          setOtherCursors(roomCursors);
         });
 
         setCursorUrl(cursorUrlArray[Math.floor(Math.random() * cursorUrlArray.length)]);
 
-    }, [user, navigate]);
+    }, [socket]);
 
     return (
         <div className='App'>
@@ -50,7 +62,7 @@ const Room1 = () => {
             Room1
         </h1>
         
-        {allUsers.map(data => {
+        {allRoomUsers.map(data => {
         // if(data.socketId !== socket.id){
           return(
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', margin: '10px 0' }}> 

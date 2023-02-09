@@ -12,34 +12,48 @@ const cursorUrlArray = [
 ];
 
 const Room2 = () => {
-    const [allUsers, setAllUsers] = useState([]);
+    const [allRoomUsers, setRoomUsers] = useState([]);
     const socket = useContext(SocketContext);
-    const[otherCursors, setOtherUsers] = useState([]);
+    const[otherCursors, setOtherCursors] = useState([]);
     const [cursorUrl, setCursorUrl] = useState("");
+    // const {user} = UserAuth();
+    // const navigate = useNavigate();
 
     useEffect(() => {
         
-      socket.on("allUsers", (data) => {
-        let roomdata = data
-        .filter(obj => obj.room === "room2")
-        setAllUsers(roomdata);
-      });
+        socket.on("allRoomUsers", (data) => {
+            let roomdata = data
+            .filter(obj => obj.room === "room2");
+            setRoomUsers(roomdata);
+        });
         
         function handleMouseMove(event){
-          socket.emit("mouseMove", {x: event.clientX, y: event.clientY});
+          socket.emit("mouseMove", {socketId : socket.id, x: event.clientX, y: event.clientY});
         }
     
         // Add event listener for mouse movement {part of DOM element}
         document.addEventListener("mousemove", handleMouseMove);
+
+        // Event listener on hitting browser Back button
+        window.onpopstate = (e) => {
+          socket.emit("backrefresh");
+        };
+
+        // Event listener on hitting browser Refresh button
+        // window.onbeforeunload = (e) => {
+        //   socket.emit("backrefresh");
+        // };
     
         // Handle broadcasted mouseMoved event from server
         socket.on("cursorUpdate", (data) => {
-          setOtherUsers(data);
+          let roomCursors = data
+          .filter (obj => obj.room === "room2");
+          setOtherCursors(roomCursors);
         });
 
         setCursorUrl(cursorUrlArray[Math.floor(Math.random() * cursorUrlArray.length)]);
 
-    }, []);
+    }, [socket]);
 
     return (
         <div className='App'>
@@ -48,7 +62,7 @@ const Room2 = () => {
             Room2
         </h1>
         
-        {allUsers.map(data => {
+        {allRoomUsers.map(data => {
         // if(data.socketId !== socket.id){
           return(
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', margin: '10px 0' }}> 
@@ -90,3 +104,4 @@ const Room2 = () => {
  };
 
 export default Room2;
+

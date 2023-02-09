@@ -19,10 +19,8 @@ server.listen(3001, ()=> {console.log('Server is Live 👽')});
 
 
 
-
-
 let allFirebaseUsers =[];
-let cursorPositions = [];
+// let cursorPositions = [];
 
 io.on("connection", (socket) => {
 
@@ -31,31 +29,31 @@ io.on("connection", (socket) => {
    
    socket.on("firebaseUser", (data) => {
       socket.join(data.room);
+      data.x = null;
+      data.y = null;
       allFirebaseUsers.push(data);
-      io.to(data.room).emit("allUsers", allFirebaseUsers);
+      io.to(data.room).emit("allRoomUsers", allFirebaseUsers);
       console.log(allFirebaseUsers);
-      let newElement = {socketId : socket.id, room : data.room, x : 0, y : 0};
-      cursorPositions.push(newElement);
-      let roomCursors = cursorPositions
-         .filter(obj => obj.room === data.room)
-         .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
-      io.to(data.room).emit("cursorUpdate", roomCursors);
+      // let newElement = {socketId : socket.id, room : data.room, x : 0, y : 0};
+      // cursorPositions.push(newElement);
+      // let roomCursors = cursorPositions
+      // io.to(data.room).emit("cursorUpdate", roomCursors);
    });
 
    // Listening to mouse movement and updating cursor positions
    socket.on("mouseMove", (data) => {
-      cursorPositions.forEach(function(obj){
-            if(obj.socketId === socket.id){
+      allFirebaseUsers.forEach(function(obj){
+            if(obj.socketId === data.socketId){
                obj.x = data.x;
                obj.y = data.y;
             }
       });
       // Emitting cursors back to the room
       let room = Array.from(socket.rooms)[1];
-      let roomCursors = cursorPositions
-         .filter(obj => obj.room === room)
-         .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
-      io.to(room).emit("cursorUpdate", roomCursors);
+      // let roomCursors = cursorPositions
+      //    .filter(obj => obj.room === room)
+      //    .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
+      io.to(room).emit("cursorUpdate", allFirebaseUsers);
       // console.log(roomCursors);
    });
 
@@ -65,16 +63,34 @@ io.on("connection", (socket) => {
       let room = Array.from(socket.rooms)[1];
       socket.leave(room);
       allFirebaseUsers = allFirebaseUsers.filter((user) => user.socketId !== socket.id);
-      io.to(room).emit("allUsers", allFirebaseUsers);
-      cursorPositions.forEach(function(obj,index) {
-         if (obj.socketId === socket.id) {
-             cursorPositions.splice(index,1);
-         }
-      });
-     let roomCursors = cursorPositions
-        .filter(obj => obj.room === room)
-        .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
-      io.to(room).emit("cursorUpdate", roomCursors);
+      io.to(room).emit("allRoomUsers", allFirebaseUsers);
+      // cursorPositions.forEach(function(obj,index) {
+      //    if (obj.socketId === socket.id) {
+      //        cursorPositions.splice(index,1);
+      //    }
+      // });
+   //   let roomCursors = cursorPositions
+   //      .filter(obj => obj.room === room)
+   //      .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
+      io.to(room).emit("cursorUpdate", allFirebaseUsers);
+
+   });
+   
+   socket.on("backrefresh", () => {
+      console.log(`user ${socket.id} disconnected`);
+      let room = Array.from(socket.rooms)[1];
+      socket.leave(room);
+      allFirebaseUsers = allFirebaseUsers.filter((user) => user.socketId !== socket.id);
+      io.to(room).emit("allRoomUsers", allFirebaseUsers);
+      // cursorPositions.forEach(function(obj,index) {
+      //    if (obj.socketId === socket.id) {
+      //        cursorPositions.splice(index,1);
+      //    }
+      // });
+   //   let roomCursors = cursorPositions
+   //      .filter(obj => obj.room === room)
+   //      .map( obj => ({socketId: obj.socketId, x: obj.x, y: obj.y}));
+      io.to(room).emit("cursorUpdate", allFirebaseUsers);
 
    });
 });
