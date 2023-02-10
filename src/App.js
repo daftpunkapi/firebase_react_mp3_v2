@@ -16,12 +16,12 @@ function App() {
         <AuthContextProvider>
           <Navbar />
           <SocketProvider>
-          <Routes>
-            <Route path='/' element={<Signin />} />
-            <Route path='/accountpage' element={<Protected><Account /></Protected>} />
-            <Route path='/accountpage/room1' element={<Protected><Room1 /></Protected>} />
-            <Route path='/accountpage/room2' element={<Protected><Room2 /></Protected>} />  
-          </Routes>
+            <Routes>
+              <Route path='/' element={<Signin />} />
+              <Route path='/accountpage' element={<Protected><Account /></Protected>} />
+              <Route path='/accountpage/room1' element={<Protected><Room1 /></Protected>} />
+              <Route path='/accountpage/room2' element={<Protected><Room2 /></Protected>} />  
+            </Routes>
           </SocketProvider>
         </AuthContextProvider>
     </div>

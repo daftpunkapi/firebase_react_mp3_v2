@@ -12,7 +12,7 @@ const firebaseConfig = {
   projectId: "mp3v2-kb",
   storageBucket: "mp3v2-kb.appspot.com",
   messagingSenderId: "74889810893",
-  appId: "1:74889810893:web:aafa695c2c65f8d60d6a84"
+  appId: "1:74889810893:web:aafa695c2c65f8d60d6a84",
 };
 
 // Initialize Firebase
